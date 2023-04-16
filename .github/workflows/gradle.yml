@@ -37,11 +37,15 @@ jobs:
         with:
           arguments: jpackage
 
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ matrix.os }}_${{ github.sha | slice(0, 8) }}
+          automatic_release_tag: ${{ matrix.os }}_${{ steps.vars.outputs.sha_short }}
           title: ${{ matrix.os }} Development Build
           prerelease: true
           files: |
