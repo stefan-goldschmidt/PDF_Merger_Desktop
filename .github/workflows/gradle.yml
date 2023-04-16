@@ -39,6 +39,7 @@ jobs:
 
       - name: Get current date
         id: date
+        shell: bash
         run: echo "MY_DATE=$(date +%Y-%m-%d-%H%M)" >> $GITHUB_ENV
 
       - name: Create Release
