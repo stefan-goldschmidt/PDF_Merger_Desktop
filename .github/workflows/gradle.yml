@@ -38,14 +38,15 @@ jobs:
           arguments: jpackage
 
       - name: Set outputs
-        run:  echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ matrix.os }}_${SHORT_SHA}
-          title: ${{ matrix.os }}_${SHORT_SHA} Development Build
+          automatic_release_tag: ${{ matrix.os }}_${{ steps.vars.outputs.sha_short }}
+          title: ${{ matrix.os }}_${{ steps.vars.outputs.sha_short }} Development Build
           prerelease: true
           files: |
             LICENSE.txt
