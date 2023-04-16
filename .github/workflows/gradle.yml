@@ -13,11 +13,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: write-all
-
 jobs:
   build:
+    permissions: write-all
 
     runs-on: ${{ matrix.os }}
     strategy:
