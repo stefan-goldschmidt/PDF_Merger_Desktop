@@ -46,7 +46,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ matrix.os }}_${{ steps.vars.outputs.sha_short }}
-          title: ${{ matrix.os }} Development Build
+          title: ${{ matrix.os }}_${{ steps.vars.outputs.sha_short }} Development Build
           prerelease: true
           files: |
             LICENSE.txt
