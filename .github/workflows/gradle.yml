@@ -36,8 +36,10 @@ jobs:
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
 
-      - name: Create Release
+      - name: Run jpacakge with Gradle Wrapper
         run: ./gradlew jpackage
+
+      - name: Create Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
