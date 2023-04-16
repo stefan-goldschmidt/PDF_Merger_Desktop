@@ -44,6 +44,12 @@ jlink {
     addExtraModulePath("javafx.controls,javafx.fxml")
     launcher {
         name = "PDFMerger Desktop"
+        //jvmArgs.addAll(listOf("--add-exports=javafx.graphics"))
+    }
+    jpackage {
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+            installerOptions.addAll(listOf("--win-per-user-install", "--win-dir-chooser", "--win-menu", "--win-shortcut"))
+        }
     }
 }
 
