@@ -30,7 +30,6 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Setup and execute Gradle 'build' and 'jpackage' task
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: build
