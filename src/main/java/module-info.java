@@ -5,6 +5,6 @@ module pdfmerger {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.swing;
-    exports org.pdfmerger to javafx.graphics, javafx.fxml;
-    opens org.pdfmerger to javafx.graphics, javafx.fxml;
+    opens org.pdfmerger;
+    exports org.pdfmerger;
 }

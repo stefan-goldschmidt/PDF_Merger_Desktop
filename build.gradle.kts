@@ -18,6 +18,8 @@ dependencies {
     implementation("org.apache.pdfbox:preflight:2.0.28")
 }
 
+
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
@@ -26,11 +28,12 @@ java {
 
 application() {
     mainClass.set("org.pdfmerger.Main")
+    mainModule.set("pdfmerger")
 }
 
 javafx {
     version = "20"
-    modules("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.swing")
+    modules("javafx.base", "javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.swing")
 }
 
 tasks.test {
@@ -38,6 +41,7 @@ tasks.test {
 }
 
 jlink {
+    addExtraModulePath("javafx.controls,javafx.fxml")
     launcher {
         name = "PDFMerger Desktop"
     }
