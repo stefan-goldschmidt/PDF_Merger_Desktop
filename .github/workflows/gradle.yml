@@ -41,7 +41,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ matrix.os }}
+          automatic_release_tag: ${{ matrix.os }}_${{ github.sha | slice(0, 8) }}
           title: ${{ matrix.os }} Development Build
           prerelease: true
           files: |
