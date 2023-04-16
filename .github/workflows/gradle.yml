@@ -46,8 +46,8 @@ jobs:
           prerelease: true
           files: |
             LICENSE.txt
-            *.pkg
-            *.dmg
-            *.msi
-            *.exe
+            ./build/jpackage/*.pkg
+            ./build/jpackage/*.dmg
+            ./build/jpackage/*.exe
+            ./build/jpackage/*.msi
           
