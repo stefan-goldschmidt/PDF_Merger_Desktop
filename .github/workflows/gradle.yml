@@ -27,17 +27,16 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '19'
+          java-version: '17'
           distribution: 'zulu'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-
-      - name: Run build with Gradle Wrapper
-        run: ./gradlew build
-
-      - name: Run jpacakge with Gradle Wrapper
-        run: ./gradlew jpackage
+      - name: Setup and execute Gradle 'build' and 'jpackage' task
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: jpackage
 
       - name: Create Release
         uses: "marvinpinto/action-automatic-releases@latest"
