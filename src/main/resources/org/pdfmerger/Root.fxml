@@ -6,8 +6,11 @@
 <?import javafx.scene.layout.*?>
 <?import org.pdfmerger.FileSelectionView?>
 <?import org.pdfmerger.PdfViewer?>
-<VBox xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.pdfmerger.RootController">
+<VBox xmlns="http://javafx.com/javafx/19"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.pdfmerger.RootController"
+      stylesheets="@design.css"
+>
     <children>
         <HBox prefHeight="45.0" prefWidth="600.0" fx:id="menuBar">
             <children>
