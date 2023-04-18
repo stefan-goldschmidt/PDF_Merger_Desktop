@@ -12,9 +12,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
@@ -32,6 +34,8 @@ public class PdfViewer extends BorderPane {
     public Label pageLabel;
     @FXML
     public ScrollPane scrollPane;
+    @FXML
+    public BorderPane imageViewContainer;
     @FXML
     public ImageView pdfImageView;
 
@@ -68,8 +72,13 @@ public class PdfViewer extends BorderPane {
 
         pdfImageView.setSmooth(false);
         pdfImageView.setPreserveRatio(true);
-        pdfImageView.fitHeightProperty().bind(scrollPane.heightProperty());
-        pdfImageView.fitWidthProperty().bind(scrollPane.widthProperty());
+
+        imageViewContainer.prefWidthProperty().bind(scrollPane.widthProperty().multiply(0.99));
+        imageViewContainer.prefHeightProperty().bind(scrollPane.heightProperty().multiply(0.99));
+
+        pdfImageView.fitHeightProperty().bind(scrollPane.heightProperty().multiply(0.9));
+        pdfImageView.fitWidthProperty().bind(scrollPane.widthProperty().multiply(0.9));
+        pdfImageView.setEffect(new DropShadow(20, Color.gray(0.5)));
 
         lastPage.bind(Bindings.createIntegerBinding(() -> getLastPage(documentObject.get()), documentObject));
 

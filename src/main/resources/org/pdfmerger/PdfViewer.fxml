@@ -5,32 +5,32 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
-<fx:root type="BorderPane" fx:id="borderPane" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
->
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<fx:root fx:id="borderPane" type="BorderPane" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
     <center>
         <ScrollPane fx:id="scrollPane" BorderPane.alignment="CENTER">
-            <content >
-                <AnchorPane>
-                    <children>
-                        <ImageView fx:id="pdfImageView" pickOnBounds="true"
-                                   preserveRatio="true"/>
-                    </children>
-                </AnchorPane>
+            <content>
+            <BorderPane fx:id="imageViewContainer">
+               <center>
+                        <ImageView fx:id="pdfImageView" pickOnBounds="true" preserveRatio="true" />
+               </center>
+            </BorderPane>
             </content>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox maxHeight="25.0" minHeight="25.0" BorderPane.alignment="CENTER" alignment="CENTER">
+        <HBox alignment="CENTER" maxHeight="25.0" minHeight="25.0" BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="prevButton" mnemonicParsing="false" text="◀" focusTraversable="false"/>
+                <Button fx:id="prevButton" focusTraversable="false" mnemonicParsing="false" text="◀" />
                 <Label fx:id="pageLabel" prefHeight="26.0" text="Label">
                     <padding>
-                        <Insets left="7.0" right="7.0"/>
+                        <Insets left="7.0" right="7.0" />
                     </padding>
                 </Label>
-                <Button fx:id="nextButton" mnemonicParsing="false" text="▶" focusTraversable="false"/>
+                <Button fx:id="nextButton" focusTraversable="false" mnemonicParsing="false" text="▶" />
             </children>
         </HBox>
     </bottom>
