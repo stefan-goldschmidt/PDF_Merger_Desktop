@@ -4,6 +4,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -12,18 +13,21 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class RootController implements Initializable {
 
 
     public ListProperty<File> fileList = new SimpleListProperty<>();
-    public FileListView fileListView;
+    @FXML
+    public FileSelectionView fileListView;
+    @FXML
     public HBox menuBar;
     public ObjectProperty<File> saveDirectory = new SimpleObjectProperty<>(new File(""));
     public ObjectProperty<File> mergedDocument = new SimpleObjectProperty<>(null);
+    @FXML
     public PdfViewer pdfViewer;
+    @FXML
     public Button saveFileButton;
 
     private final PdfHandler pdfHandler = new PdfHandler();
@@ -57,11 +61,5 @@ public class RootController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText("File has been saved");
         alert.showAndWait();
-    }
-
-    public void openButtonAction() {
-        FileChooser fileChooser = new FileChooser();
-        List<File> list = fileChooser.showOpenMultipleDialog(menuBar.getScene().getWindow());
-        fileList.setAll(list);
     }
 }

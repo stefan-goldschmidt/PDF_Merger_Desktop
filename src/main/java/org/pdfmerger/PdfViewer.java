@@ -7,14 +7,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
@@ -22,7 +22,19 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class PdfViewer extends StackPane {
+public class PdfViewer extends BorderPane {
+
+    @FXML
+    public Button prevButton;
+    @FXML
+    public Button nextButton;
+    @FXML
+    public Label pageLabel;
+    @FXML
+    public ScrollPane scrollPane;
+    @FXML
+    public ImageView pdfImageView;
+
 
     public ObjectProperty<File> documentObjectProperty() {
         return documentObject;
@@ -34,28 +46,30 @@ public class PdfViewer extends StackPane {
     private final IntegerProperty currentPage = new SimpleIntegerProperty(0);
 
     public PdfViewer() {
-        Button prevButton = new Button("Previous Page");
-        prevButton.setOnAction(e -> previousPage());
+        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("PdfViewer.fxml"));
+        fxmlLoader.setController(this);
+        fxmlLoader.setRoot(this);
+        try {
+            fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        Button nextButton = new Button("Next Page");
+    @FXML
+    public void initialize() {
+        prevButton.setOnAction(e -> previousPage());
         nextButton.setOnAction(e -> nextPage());
 
         nextButton.disableProperty().bind(Bindings.createBooleanBinding(() -> currentPage.get() >= lastPage.get() - 1, currentPage, lastPage));
         prevButton.disableProperty().bind(Bindings.createBooleanBinding(() -> currentPage.get() <= 0, currentPage, lastPage));
 
-        Label pageLabel = new Label();
         pageLabel.textProperty().bind(Bindings.createStringBinding(() -> (lastPage.get() == 0 ? 0 : (currentPage.get() + 1)) + " of " + lastPage.get(), currentPage, lastPage));
 
-        BorderPane borderPane = new BorderPane();
-        ScrollPane root = new ScrollPane();
-        ImageView imageView = new ImageView();
-        imageView.setSmooth(false);
-        imageView.setPreserveRatio(true);
-        root.setContent(imageView);
-
-        borderPane.setCenter(root);
-        borderPane.setBottom(new HBox(prevButton, pageLabel, nextButton));
-        this.getChildren().add(borderPane);
+        pdfImageView.setSmooth(false);
+        pdfImageView.setPreserveRatio(true);
+        pdfImageView.fitHeightProperty().bind(scrollPane.heightProperty());
+        pdfImageView.fitWidthProperty().bind(scrollPane.widthProperty());
 
         lastPage.bind(Bindings.createIntegerBinding(() -> getLastPage(documentObject.get()), documentObject));
 
@@ -63,7 +77,7 @@ public class PdfViewer extends StackPane {
                 Bindings.createObjectBinding(() -> renderDocumentToImage(documentObject.get(), currentPage.get()), currentPage, documentObject);
 
 
-        imageView.imageProperty().bind(renderedImage);
+        pdfImageView.imageProperty().bind(renderedImage);
     }
 
     private Integer getLastPage(File file) {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.*?>
+<fx:root xmlns="http://javafx.com/javafx/19"
+         xmlns:fx="http://javafx.com/fxml/1"
+         type="BorderPane">
+    <top>
+        <HBox>
+            <ChoiceBox prefWidth="150.0" BorderPane.alignment="CENTER" fx:id="sortingChoiceBox"
+                       focusTraversable="false"/>
+            <Button mnemonicParsing="false" text="Add Files" fx:id="addFilesButton" focusTraversable="false"/>
+        </HBox>
+    </top>
+    <center>
+        <ListView BorderPane.alignment="CENTER" fx:id="listView" focusTraversable="false"/>
+    </center>
+</fx:root>
