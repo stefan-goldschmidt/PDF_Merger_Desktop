@@ -7,9 +7,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -61,13 +58,6 @@ public class PdfViewer extends BorderPane {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        this.addEventFilter(EventType.ROOT, new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                System.out.println(event.getSource() + " " + event.getEventType());
-            }
-        });
     }
 
     @FXML

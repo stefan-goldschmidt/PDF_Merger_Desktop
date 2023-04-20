@@ -9,7 +9,13 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,27 +59,79 @@ public class PdfHandler {
         }
     }
 
+
+    static class StreamWrapper implements AutoCloseable {
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        private int x;
+        private int y;
+
+        private PDPageContentStream contentStream;
+
+        public StreamWrapper(PDDocument document, PDPage sourcePage) throws IOException {
+            contentStream = new PDPageContentStream(document, sourcePage);
+            //x = (int) sourcePage.getMediaBox().getLowerLeftX();
+            //y = (int) sourcePage.getMediaBox().getUpperRightY();
+            x = 0;
+            y = 0;
+        }
+
+        public PDPageContentStream getContentStream() {
+            return contentStream;
+        }
+
+        @Override
+        public void close() throws Exception {
+            contentStream.close();
+        }
+
+
+        public void newLineAtOffset(int tx, int ty) throws IOException {
+            x += tx;
+            y += ty;
+            contentStream.newLineAtOffset(tx, ty);
+        }
+    }
+
     private PDPage createCoverPage(PDDocument document, List<ContentEntry> entries, PDPage coverPage) {
-        try (PDPageContentStream contentStream = new PDPageContentStream(document, coverPage)) {
-            contentStream.beginText();
+        try (StreamWrapper wrapper = new StreamWrapper(document, coverPage)) {
+            wrapper.getContentStream().beginText();
+            int marginLeft = 30;
+            int marginTop = (int) (coverPage.getMediaBox().getUpperRightY() - 100);
 
             // make title
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
-            contentStream.newLineAtOffset(100, 700);
-            contentStream.showText("Merged PDF Files");
+            wrapper.getContentStream().setFont(PDType1Font.HELVETICA_BOLD, 14);
+            wrapper.setY(18); // FIXME: where does this offset come from?
+            wrapper.newLineAtOffset(marginLeft, marginTop);
+            wrapper.getContentStream().showText("Merged PDF Files");
 
             // make content list
             int fontSize = 12;
-            contentStream.setFont(PDType1Font.HELVETICA, fontSize);
-            contentStream.newLineAtOffset(-80, -20);
+            wrapper.getContentStream().setFont(PDType1Font.HELVETICA, fontSize);
+            wrapper.newLineAtOffset(0, -20);
 
             for (ContentEntry entry : entries) {
-                String text = "- " + entry.name();
-                contentStream.showText(text);
-                contentStream.newLineAtOffset(0, -20);
+                String text = (entry.firstPage + 2) + " " + entry.name();
+                wrapper.getContentStream().showText(text);
+                wrapper.newLineAtOffset(0, -20);
 
-                /*PDPageDestination dest = new PDPageFitWidthDestination();
-                dest.setPage(entry.firstPage());
+                PDPageDestination dest = new PDPageFitWidthDestination();
+                dest.setPage(document.getPage(entry.firstPage));
                 PDActionGoTo action = new PDActionGoTo();
                 action.setDestination(dest);
                 PDAnnotationLink link = new PDAnnotationLink();
@@ -82,76 +140,59 @@ public class PdfHandler {
                 link.setAction(action);
 
                 // Calculate the position and size of the link annotation
-                float x = 100;
-                float y = 100;//contentStream.getCurrentPosition().getY() - 6;
                 float width = PDType1Font.HELVETICA.getStringWidth(text) / 1000 * fontSize;
-                float height = fontSize;
 
                 // Add the link annotation to the cover page
-                link.setRectangle(new PDRectangle(x, y, width, height));
+                link.setRectangle(new PDRectangle(wrapper.getX(), wrapper.getY(), width, (float) fontSize));
                 coverPage.getAnnotations().add(link);
-*/
-
-                //contentStream.endText();
-
-               /* PDPageDestination dest = new PDPageFitWidthDestination();
-                dest.setPage(mergedDocument.getPage(0));
-                PDActionGoTo action = new PDActionGoTo();
-                action.setDestination(dest);
-                PDAnnotationLink link = new PDAnnotationLink();
-                link.setBorderStyle(new PDBorderStyleDictionary());
-                link.setDestination(dest);
-                link.setAction(action);*/
-
-                // Calculate the position and size of the link annotation
-                // float x = 100;
-                // float y = contentStream.getCurrentPosition().getY() - 6;
-                // float width = PDType1Font.HELVETICA.getStringWidth(pdfFile.getName()) / 1000 * 12;
-                // float height = 12;
-
-                // Add the link annotation to the cover page
-                // link.setRectangle(new PDRectangle(x, y, width, height));
-                //coverPage.getAnnotations().add(link);
             }
-            contentStream.endText();
-            // contentStream.close();
+            wrapper.getContentStream().endText();
             return coverPage;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private record ContentEntry(String name, PDPage firstPage) {
+    private record ContentEntry(String name, int firstPage) {
 
     }
 
     public File createMergedDocument(List<File> pdfFiles) {
         if (pdfFiles.size() == 0) return null;
         PDFMergerUtility pdfMerger = new PDFMergerUtility();
-        try (PDDocument outputDocument = new PDDocument()) {
+        int currentPage = 0;
+        List<ContentEntry> contentEntries = new ArrayList<>();
+        File file = new File(tempDirWithPrefix + "tmpfile.pdf");
 
-            PDPage coverPage = new PDPage();
-            outputDocument.addPage(coverPage);
+        // Initial run: merge documents
+        try (PDDocument doc = new PDDocument()) {
 
-            List<ContentEntry> contentEntries = new ArrayList<>();
             for (File pdfFile : pdfFiles) {
                 try (PDDocument document = PDDocument.load(pdfFile)) {
-                    pdfMerger.appendDocument(outputDocument, document);
-                    contentEntries.add(new ContentEntry(pdfFile.getName(), document.getPage(0)));
+                    pdfMerger.appendDocument(doc, document);
+                    contentEntries.add(new ContentEntry(pdfFile.getName(), currentPage));
+                    currentPage += document.getNumberOfPages();
                 }
             }
 
-            createCoverPage(outputDocument, contentEntries, coverPage);
-
             pdfMerger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 
-            File file = new File(tempDirWithPrefix + "tmpfile.pdf");
-            outputDocument.save(file);
-            outputDocument.close();
-            return file;
+            doc.save(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        try (PDDocument doc = PDDocument.load(file)) {
+            //PDPage coverPage = new PDPage();
+            PDPage coverPage = createCoverPage(doc, contentEntries, new PDPage());
+            doc.getPages().insertBefore(coverPage, doc.getPage(0));
+
+            doc.save(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return file;
     }
 
     public void saveFileToDisk(File outputFile) {

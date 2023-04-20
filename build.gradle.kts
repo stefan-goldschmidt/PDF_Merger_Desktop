@@ -16,6 +16,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("org.apache.pdfbox:pdfbox:2.0.28")
     implementation("org.apache.pdfbox:preflight:2.0.28")
+    implementation("org.kordamp.ikonli:ikonli-core:12.3.1")
+    implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
+    implementation("org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1")
 }
 
 

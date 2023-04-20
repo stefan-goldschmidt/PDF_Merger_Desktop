@@ -5,12 +5,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignO;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +29,9 @@ public class FileSelectionView extends BorderPane {
     public Button addFilesButton;
 
     public List<SortingStrategy> sortingStrategies = List.of(
-            new SortingStrategy("Alphabetical (A-Z)", Comparator.comparing(File::getName)),
-            new SortingStrategy("Alphabetical (Z-A)", Comparator.comparing(File::getName).reversed()),
-            new SortingStrategy("Custom", Comparator.comparingInt(f -> 0)) // No sorting
+            new SortingStrategy("Alphabetical", FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 16), Comparator.comparing(File::getName)),
+            new SortingStrategy("Alphabetical", FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 16), Comparator.comparing(File::getName).reversed()),
+            new SortingStrategy("Custom", FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 16), Comparator.comparingInt(f -> 0)) // No sorting
     );
 
     public FileSelectionView() {
@@ -53,7 +55,7 @@ public class FileSelectionView extends BorderPane {
         ObservableValue<Comparator<File>> sortingComparator = sortingChoiceBox.getSelectionModel().selectedItemProperty().map(SortingStrategy::comparator);
         sortingComparator.addListener((observable, oldValue, newValue) -> listView.getItems().sort(newValue));
 
-        listView.setCellFactory(param -> new AttachmentListCell());
+        listView.setCellFactory(param -> new XCell());
         addFilesButton.setOnAction(e -> addFilesAction());
     }
 
@@ -61,15 +63,32 @@ public class FileSelectionView extends BorderPane {
         return listView.itemsProperty();
     }
 
-    private static class AttachmentListCell extends ListCell<File> {
+
+    static class XCell extends ListCell<File> {
+        HBox hbox = new HBox();
+        Label label = new Label();
+        Pane pane = new Pane();
+        Button button = new Button("✕");
+        File lastItem;
+
+        public XCell() {
+            super();
+            hbox.getChildren().addAll(label, pane, button);
+            HBox.setHgrow(pane, Priority.ALWAYS);
+            button.setOnAction(event -> listViewProperty().get().getItems().remove(lastItem));
+        }
+
         @Override
-        public void updateItem(File item, boolean empty) {
+        protected void updateItem(File item, boolean empty) {
             super.updateItem(item, empty);
+            setText(null);  // No text in label of super class
             if (empty) {
+                lastItem = null;
                 setGraphic(null);
-                setText(null);
             } else {
-                setText(item.getName());
+                lastItem = item;
+                label.setText(item != null ? item.getName() : "<null>");
+                setGraphic(hbox);
             }
         }
     }
