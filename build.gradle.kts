@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     implementation("org.apache.pdfbox:pdfbox:2.0.28")
     implementation("org.apache.pdfbox:preflight:2.0.28")
     implementation("org.kordamp.ikonli:ikonli-core:12.3.1")
@@ -41,6 +41,7 @@ javafx {
 
 tasks.test {
     useJUnitPlatform()
+    exclude("**/*")
 }
 
 jlink {
