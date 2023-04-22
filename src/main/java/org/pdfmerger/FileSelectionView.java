@@ -21,18 +21,12 @@ import java.util.List;
 
 public class FileSelectionView extends BorderPane {
     @FXML
-    public ChoiceBox<SortingStrategy> sortingChoiceBox;
+    public ComboBox<SortingStrategy> sortingChoiceBox;
     @FXML
     public ListView<File> listView;
-
     @FXML
     public Button addFilesButton;
 
-    public List<SortingStrategy> sortingStrategies = List.of(
-            new SortingStrategy("Alphabetical", FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 16), Comparator.comparing(File::getName)),
-            new SortingStrategy("Alphabetical", FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 16), Comparator.comparing(File::getName).reversed()),
-            new SortingStrategy("Custom", FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 16), Comparator.comparingInt(f -> 0)) // No sorting
-    );
 
     public FileSelectionView() {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("FileSelectionView.fxml"));
@@ -48,15 +42,21 @@ public class FileSelectionView extends BorderPane {
     @FXML
     public void initialize() {
         // Set up the sortingChoiceBox
-        sortingChoiceBox.getItems().addAll(sortingStrategies);
-        sortingChoiceBox.setConverter(SortingStrategy.getSortingStrategyStringConverter());
+        sortingChoiceBox.setButtonCell(new SortingStrategyListCell());
+        sortingChoiceBox.setCellFactory(param -> new SortingStrategyListCell());
+        sortingChoiceBox.getItems().addAll(List.of(
+                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 12), Comparator.comparing(File::getName)),
+                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 12), Comparator.comparing(File::getName).reversed()),
+                new SortingStrategy("Custom (None)", () -> FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 12), Comparator.comparingInt(f -> 0)) // No sorting
+        ));
         sortingChoiceBox.getSelectionModel().selectFirst();
 
         ObservableValue<Comparator<File>> sortingComparator = sortingChoiceBox.getSelectionModel().selectedItemProperty().map(SortingStrategy::comparator);
         sortingComparator.addListener((observable, oldValue, newValue) -> listView.getItems().sort(newValue));
 
-        listView.setCellFactory(param -> new XCell());
+        listView.setCellFactory(param -> new FileListCell());
         addFilesButton.setOnAction(e -> addFilesAction());
+
     }
 
     public ObjectProperty<ObservableList<File>> itemsProperty() {
@@ -64,14 +64,14 @@ public class FileSelectionView extends BorderPane {
     }
 
 
-    static class XCell extends ListCell<File> {
+    private static class FileListCell extends ListCell<File> {
         HBox hbox = new HBox();
         Label label = new Label();
         Pane pane = new Pane();
         Button button = new Button("✕");
         File lastItem;
 
-        public XCell() {
+        public FileListCell() {
             super();
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
@@ -105,4 +105,17 @@ public class FileSelectionView extends BorderPane {
         listView.getItems().addAll(list);
     }
 
+    private static class SortingStrategyListCell extends ListCell<SortingStrategy> {
+        @Override
+        protected void updateItem(SortingStrategy item, boolean empty) {
+            super.updateItem(item, empty);
+            if (item == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                setGraphic(item.icon().get());
+                setText(item.displayName());
+            }
+        }
+    }
 }

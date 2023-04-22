@@ -6,13 +6,14 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.scene.control.ComboBox?>
 <fx:root xmlns="http://javafx.com/javafx/19"
          xmlns:fx="http://javafx.com/fxml/1"
          type="BorderPane">
     <top>
         <HBox>
-            <ChoiceBox prefWidth="150.0" BorderPane.alignment="CENTER" fx:id="sortingChoiceBox"
-                       focusTraversable="false"/>
+            <ComboBox prefWidth="150.0" BorderPane.alignment="CENTER" fx:id="sortingChoiceBox"
+                      focusTraversable="false"/>
             <Button mnemonicParsing="false" fx:id="addFilesButton" focusTraversable="false">
                 <graphic>
                     <FontIcon iconLiteral="mdi2f-file-plus-outline" iconSize="18"/>
