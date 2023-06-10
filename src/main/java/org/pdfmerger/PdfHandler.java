@@ -108,52 +108,102 @@ public class PdfHandler {
         }
     }
 
-    private PDPage createCoverPage(PDDocument document, List<ContentEntry> entries, PDPage coverPage) {
-        try (StreamWrapper wrapper = new StreamWrapper(document, coverPage)) {
-            wrapper.getContentStream().beginText();
-            int marginLeft = 30;
-            int marginTop = (int) (coverPage.getMediaBox().getUpperRightY() - 100);
+    private void createAndInsertCoverPages(PDDocument document, List<ContentEntry> entries) {
 
-            // make title
-            wrapper.getContentStream().setFont(PDType1Font.HELVETICA_BOLD, 14);
-            wrapper.setY(18); // FIXME: where does this offset come from?
-            wrapper.newLineAtOffset(marginLeft, marginTop);
-            wrapper.getContentStream().showText("Merged PDF Files");
 
-            // make content list
-            int fontSize = 12;
-            wrapper.getContentStream().setFont(PDType1Font.HELVETICA, fontSize);
-            wrapper.newLineAtOffset(0, -20);
+        PDPage currentPage = document.getPage(0);
+        List<ContentPage> pagePartitionedEntries = partitionLists(entries, 20);
 
-            for (ContentEntry entry : entries) {
-                String text = (entry.firstPage + 2) + " " + entry.name();
-                wrapper.getContentStream().showText(text);
-                wrapper.newLineAtOffset(0, -20);
+        for (ContentPage contentPage : pagePartitionedEntries) {
+            final PDPage page = new PDPage();
+            try (StreamWrapper wrapper = new StreamWrapper(document, page)) {
+                wrapper.getContentStream().beginText();
+                int marginLeft = 30;
+                int marginTop = (int) (page.getMediaBox().getUpperRightY() - 50);
 
-                PDPageDestination dest = new PDPageFitWidthDestination();
-                dest.setPage(document.getPage(entry.firstPage));
-                PDActionGoTo action = new PDActionGoTo();
-                action.setDestination(dest);
-                PDAnnotationLink link = new PDAnnotationLink();
-                link.setBorderStyle(new PDBorderStyleDictionary());
-                link.setDestination(dest);
-                link.setAction(action);
+                // make title
+                int headerFontSize = 14;
+                wrapper.getContentStream().setFont(PDType1Font.HELVETICA_BOLD, headerFontSize);
+                wrapper.setY(headerFontSize);
+                wrapper.newLineAtOffset(marginLeft, marginTop);
+                wrapper.getContentStream().showText(contentPage.heading());
 
-                // Calculate the position and size of the link annotation
-                float width = PDType1Font.HELVETICA.getStringWidth(text) / 1000 * fontSize;
+                // make content list
+                int fontSize = 12;
+                wrapper.getContentStream().setFont(PDType1Font.HELVETICA, fontSize);
+                int lineYOffset = -16;
+                wrapper.newLineAtOffset(0, lineYOffset);
 
-                // Add the link annotation to the cover page
-                link.setRectangle(new PDRectangle(wrapper.getX(), wrapper.getY(), width, (float) fontSize));
-                coverPage.getAnnotations().add(link);
+                for (ContentSection section : contentPage.sections()) {
+                    wrapper.getContentStream().showText(section.sectionName());
+                    wrapper.newLineAtOffset(0, lineYOffset);
+
+                    for (ContentEntry entry : section.contentEntries()) {
+                        String text = (entry.referencedPage() + 2) + " " + entry.name();
+                        wrapper.getContentStream().showText(text);
+                        wrapper.newLineAtOffset(0, lineYOffset);
+
+                        PDPageDestination dest = new PDPageFitWidthDestination();
+                        dest.setPage(document.getPage(entry.referencedPage()));
+                        PDActionGoTo action = new PDActionGoTo();
+                        action.setDestination(dest);
+                        PDAnnotationLink link = new PDAnnotationLink();
+                        PDBorderStyleDictionary borderStyle = new PDBorderStyleDictionary();
+                        link.setBorderStyle(borderStyle);
+                        link.setDestination(dest);
+                        link.setAction(action);
+
+                        // Calculate the position and size of the link annotation
+                        float width = PDType1Font.HELVETICA.getStringWidth(text) / 1000 * fontSize;
+
+                        // Add the link annotation to the cover page
+                        int padding = 2;
+                        PDRectangle rectangle = new PDRectangle(wrapper.getX() - padding, wrapper.getY() - padding, width + padding * 2, (float) fontSize + padding);
+                        link.setRectangle(rectangle);
+                        page.getAnnotations().add(link);
+                    }
+                }
+                wrapper.getContentStream().endText();
+                document.getPages().insertBefore(page, currentPage);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            wrapper.getContentStream().endText();
-            return coverPage;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
         }
     }
 
-    private record ContentEntry(String name, int firstPage) {
+    private List<ContentPage> partitionLists(List<ContentEntry> contentEntries, int partitionSize) {
+        List<ContentPage> contentPages = new ArrayList<>();
+
+        ContentPage currentPage = null;
+        ContentSection currentSection = null;
+        int pageEntryCounter = 0;
+
+        // Set the desired limit for entries per content page
+        for (ContentEntry entry : contentEntries) {
+            // Check if a new content page needs to be created
+            if (currentPage == null || currentSection == null || pageEntryCounter >= partitionSize) {
+                // Create a new content page and section
+                currentSection = new ContentSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
+                currentPage = new ContentPage(entry.name().substring(0, 1), new ArrayList<>());
+                currentPage.sections().add(currentSection);
+                contentPages.add(currentPage);
+                pageEntryCounter = 0;
+            }
+
+            // Check if a new content section needs to be created
+            if (!String.valueOf(entry.name().charAt(0)).equals(currentSection.sectionName())) {
+                // Create a new content section
+                currentSection = new ContentSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
+                currentPage.sections().add(currentSection);
+            }
+
+            // Add the entry to the current section
+            currentSection.contentEntries().add(new ContentEntry(entry.name(), entry.referencedPage() + contentPages.size() - 1));
+            pageEntryCounter++;
+        }
+
+        return contentPages;
 
     }
 
@@ -183,10 +233,7 @@ public class PdfHandler {
         }
 
         try (PDDocument doc = PDDocument.load(file)) {
-            //PDPage coverPage = new PDPage();
-            PDPage coverPage = createCoverPage(doc, contentEntries, new PDPage());
-            doc.getPages().insertBefore(coverPage, doc.getPage(0));
-
+            createAndInsertCoverPages(doc, contentEntries);
             doc.save(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
