@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 
 public class PdfHandler {
 
-
     private final ObjectProperty<SettingsView.SettingsRecord> settings = new SimpleObjectProperty<>();
 
     public ObjectProperty<SettingsView.SettingsRecord> settingsProperty() {
@@ -268,7 +267,6 @@ public class PdfHandler {
                     tocBuilder.addEntry(new TocEntry(pdfFile.getName(), currentPage));
                     currentPage += document.getNumberOfPages();
                 }
-                Thread.sleep(100);
                 progressUpdateCallable.accept(currentFile++);
             }
 
@@ -276,8 +274,6 @@ public class PdfHandler {
 
             doc.save(file);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
