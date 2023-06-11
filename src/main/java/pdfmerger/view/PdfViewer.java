@@ -1,4 +1,4 @@
-package pdfmerger;
+package pdfmerger.view;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -6,7 +6,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -17,10 +16,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
+import pdfmerger.pdf.PdfFileUtil;
+import pdfmerger.pdf.PdfToImageConverter;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -80,25 +78,13 @@ public class PdfViewer extends BorderPane {
         pdfImageView.fitWidthProperty().bind(scrollPane.widthProperty().multiply(0.9));
         pdfImageView.setEffect(new DropShadow(20, Color.gray(0.5)));
 
-        lastPage.bind(Bindings.createIntegerBinding(() -> getLastPage(documentObject.get()), documentObject));
+        lastPage.bind(Bindings.createIntegerBinding(() -> PdfFileUtil.getLastPage(documentObject.get()), documentObject));
 
         ObjectBinding<Image> renderedImage =
-                Bindings.createObjectBinding(() -> renderDocumentToImage(documentObject.get(), currentPage.get()), currentPage, documentObject);
+                Bindings.createObjectBinding(() -> PdfToImageConverter.renderDocumentToImage(documentObject.get(), currentPage.get()), currentPage, documentObject);
 
 
         pdfImageView.imageProperty().bind(renderedImage);
-    }
-
-    private Integer getLastPage(File file) {
-        if (file == null) return 0;
-        try (PDDocument document = PDDocument.load(file)) {
-            if (document == null) {
-                return 0;
-            }
-            return document.getNumberOfPages();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void nextPage() {
@@ -123,21 +109,4 @@ public class PdfViewer extends BorderPane {
         }
     }
 
-    private static Image renderDocumentToImage(File file, int page) {
-        if (file == null) return null;
-        try (PDDocument document = PDDocument.load(file)) {
-            if (document == null || document.getNumberOfPages() < page) {
-                return null;
-            }
-
-            PDFRenderer pdfRenderer = new PDFRenderer(document);
-            BufferedImage image = null;
-            image = pdfRenderer.renderImage(page);
-            return SwingFXUtils.toFXImage(image, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
 }

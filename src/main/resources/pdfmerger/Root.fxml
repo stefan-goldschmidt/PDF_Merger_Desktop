@@ -5,9 +5,9 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import pdfmerger.FileSelectionView?>
-<?import pdfmerger.PdfViewer?>
-<?import pdfmerger.SettingsView?>
+<?import pdfmerger.view.FileSelectionView?>
+<?import pdfmerger.view.PdfViewer?>
+<?import pdfmerger.view.SettingsView?>
 <VBox xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="pdfmerger.RootController"

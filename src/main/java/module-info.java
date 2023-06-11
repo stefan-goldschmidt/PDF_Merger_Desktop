@@ -10,4 +10,6 @@ open module pdfmerger {
     requires org.kordamp.ikonli.materialdesign2;
     exports pdfmerger.tableofcontents;
     exports pdfmerger;
+    exports pdfmerger.pdf;
+    exports pdfmerger.view;
 }

@@ -1,4 +1,4 @@
-package pdfmerger;
+package pdfmerger.view;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -71,9 +71,6 @@ public class SettingsView extends BorderPane {
 
     public ObjectProperty<SettingsRecord> settingsProperty() {
         return settings;
-    }
-
-    public record SettingsRecord(String documentName, int entriesPerPage) {
     }
 
 }

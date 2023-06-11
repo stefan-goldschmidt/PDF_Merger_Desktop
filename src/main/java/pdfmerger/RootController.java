@@ -10,6 +10,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+import pdfmerger.pdf.PdfHandler;
+import pdfmerger.view.FileSelectionView;
+import pdfmerger.view.PdfViewer;
+import pdfmerger.view.SettingsView;
 
 import java.io.File;
 import java.net.URL;
@@ -26,7 +30,6 @@ public class RootController implements Initializable {
     @FXML
     public HBox menuBar;
     public ObjectProperty<File> saveDirectory = new SimpleObjectProperty<>(new File(""));
-    public ObjectProperty<File> mergedDocument = new SimpleObjectProperty<>(null);
     @FXML
     public PdfViewer pdfViewer;
     @FXML
@@ -34,7 +37,6 @@ public class RootController implements Initializable {
 
     private final PdfHandler pdfHandler = new PdfHandler();
 
-    // private WebView webView;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         fileList.bind(fileListView.itemsProperty());

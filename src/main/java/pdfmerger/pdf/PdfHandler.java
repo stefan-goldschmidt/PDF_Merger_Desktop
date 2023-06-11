@@ -1,4 +1,4 @@
-package pdfmerger;
+package pdfmerger.pdf;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -22,6 +22,7 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
+import pdfmerger.view.SettingsRecord;
 import pdfmerger.tableofcontents.*;
 
 import java.io.File;
@@ -34,9 +35,9 @@ import java.util.function.Consumer;
 
 public class PdfHandler {
 
-    private final ObjectProperty<SettingsView.SettingsRecord> settings = new SimpleObjectProperty<>();
+    private final ObjectProperty<SettingsRecord> settings = new SimpleObjectProperty<>();
 
-    public ObjectProperty<SettingsView.SettingsRecord> settingsProperty() {
+    public ObjectProperty<SettingsRecord> settingsProperty() {
         return settings;
     }
 
@@ -76,7 +77,7 @@ public class PdfHandler {
         createMergedDocumentWithLoadingDialog(filesList, settings.get());
     }
 
-    public void createMergedDocumentWithLoadingDialog(List<File> filesList, SettingsView.SettingsRecord settings) {
+    public void createMergedDocumentWithLoadingDialog(List<File> filesList, SettingsRecord settings) {
 
         if (filesList.isEmpty()) return;
         Task<File> task = new Task<>() {
@@ -180,7 +181,7 @@ public class PdfHandler {
         }
     }
 
-    private void insertTableOfContents(PDDocument document, Toc toc, SettingsView.SettingsRecord settings) {
+    private void insertTableOfContents(PDDocument document, Toc toc, SettingsRecord settings) {
         // Get the first page of the document
         PDPage currentPage = document.getPage(0);
 
@@ -250,8 +251,17 @@ public class PdfHandler {
         }
     }
 
+    private static String formatTocEntry(int i, String text) throws IOException {
+        StringBuilder padded = new StringBuilder(text.substring(0, Math.min(text.length(), 70)));
 
-    public File createMergedDocument(List<File> pdfFiles, SettingsView.SettingsRecord settings, Consumer<Integer> progressUpdateCallable) {
+        while (PDType1Font.HELVETICA.getStringWidth(padded.toString()) / 1000 * 12 < 450) {
+            padded.append(' ');
+        }
+        return padded.toString() + i;
+    }
+
+
+    public File createMergedDocument(List<File> pdfFiles, SettingsRecord settings, Consumer<Integer> progressUpdateCallable) {
         if (pdfFiles.size() == 0) return null;
         PDFMergerUtility pdfMerger = new PDFMergerUtility();
         int currentPage = 0;

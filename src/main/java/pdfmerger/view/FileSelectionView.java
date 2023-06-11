@@ -1,4 +1,4 @@
-package pdfmerger;
+package pdfmerger.view;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignO;
+import pdfmerger.view.SortingStrategy;
 
 import java.io.File;
 import java.io.IOException;

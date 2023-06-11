@@ -1,4 +1,4 @@
-package pdfmerger;
+package pdfmerger.view;
 
 import javafx.scene.Node;
 
