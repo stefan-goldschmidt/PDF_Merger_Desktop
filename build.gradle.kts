@@ -4,7 +4,7 @@ plugins {
     id("org.beryx.jlink") version "2.25.0"
 }
 
-group = "org.pdfmerger"
+group = "pdfmerger"
 version = "1.0.0"
 
 repositories {
@@ -19,6 +19,7 @@ dependencies {
     implementation("org.kordamp.ikonli:ikonli-core:12.3.1")
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
     implementation("org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1")
+
 }
 
 
@@ -30,7 +31,7 @@ java {
 }
 
 application() {
-    mainClass.set("org.pdfmerger.Main")
+    mainClass.set("pdfmerger.Main")
     mainModule.set("pdfmerger")
 }
 
@@ -41,7 +42,7 @@ javafx {
 
 tasks.test {
     useJUnitPlatform()
-    exclude("**/*")
+   // exclude("**/*")
 }
 
 jlink {

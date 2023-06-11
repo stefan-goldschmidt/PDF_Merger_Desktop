@@ -5,11 +5,11 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import org.pdfmerger.FileSelectionView?>
-<?import org.pdfmerger.PdfViewer?>
+<?import pdfmerger.FileSelectionView?>
+<?import pdfmerger.PdfViewer?>
 <VBox xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.pdfmerger.RootController"
+      fx:controller="pdfmerger.RootController"
       stylesheets="@design.css"
 >
     <children>

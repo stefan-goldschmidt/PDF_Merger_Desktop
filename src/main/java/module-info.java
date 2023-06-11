@@ -8,6 +8,7 @@ module pdfmerger {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.materialdesign2;
-    opens org.pdfmerger;
-    exports org.pdfmerger;
+    exports pdfmerger.tableofcontents;
+    opens pdfmerger.tableofcontents;
+    exports pdfmerger;
 }

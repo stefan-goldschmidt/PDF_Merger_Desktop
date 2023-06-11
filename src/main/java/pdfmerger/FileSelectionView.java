@@ -1,4 +1,4 @@
-package org.pdfmerger;
+package pdfmerger;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;

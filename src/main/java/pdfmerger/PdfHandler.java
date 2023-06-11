@@ -1,4 +1,4 @@
-package org.pdfmerger;
+package pdfmerger;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -16,13 +16,13 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
+import pdfmerger.tableofcontents.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PdfHandler {
@@ -40,7 +40,6 @@ public class PdfHandler {
     }
 
     private final ObjectProperty<File> outputDocument = new SimpleObjectProperty<>(null);
-    private final ObjectProperty<PDPage> coverPage = new SimpleObjectProperty<>();
 
     public ListProperty<File> filesProperty() {
         return filesList;
@@ -108,41 +107,45 @@ public class PdfHandler {
         }
     }
 
-    private void createAndInsertCoverPages(PDDocument document, List<ContentEntry> entries) {
-
-
+    private void insertTableOfContents(PDDocument document, Toc toc) {
+        // Get the first page of the document
         PDPage currentPage = document.getPage(0);
-        List<ContentPage> pagePartitionedEntries = partitionLists(entries, 20);
 
-        for (ContentPage contentPage : pagePartitionedEntries) {
+        // Iterate through each TOC page
+        for (TocPage tocPage : toc.tocPages()) {
+            // Create a new page for the TOC
             final PDPage page = new PDPage();
             try (StreamWrapper wrapper = new StreamWrapper(document, page)) {
                 wrapper.getContentStream().beginText();
+
                 int marginLeft = 30;
                 int marginTop = (int) (page.getMediaBox().getUpperRightY() - 50);
 
-                // make title
+                // Make the title
                 int headerFontSize = 14;
                 wrapper.getContentStream().setFont(PDType1Font.HELVETICA_BOLD, headerFontSize);
                 wrapper.setY(headerFontSize);
                 wrapper.newLineAtOffset(marginLeft, marginTop);
-                wrapper.getContentStream().showText(contentPage.heading());
+                wrapper.getContentStream().showText(tocPage.heading());
 
-                // make content list
+                // Make the content list
                 int fontSize = 12;
                 wrapper.getContentStream().setFont(PDType1Font.HELVETICA, fontSize);
                 int lineYOffset = -16;
                 wrapper.newLineAtOffset(0, lineYOffset);
 
-                for (ContentSection section : contentPage.sections()) {
+                // Iterate through each section in the TOC page
+                for (TocSection section : tocPage.sections()) {
                     wrapper.getContentStream().showText(section.sectionName());
                     wrapper.newLineAtOffset(0, lineYOffset);
 
-                    for (ContentEntry entry : section.contentEntries()) {
+                    // Iterate through each entry in the section
+                    for (TocEntry entry : section.contentEntries()) {
                         String text = (entry.referencedPage() + 2) + " " + entry.name();
                         wrapper.getContentStream().showText(text);
                         wrapper.newLineAtOffset(0, lineYOffset);
 
+                        // Create a link annotation for the entry
                         PDPageDestination dest = new PDPageFitWidthDestination();
                         dest.setPage(document.getPage(entry.referencedPage()));
                         PDActionGoTo action = new PDActionGoTo();
@@ -156,71 +159,39 @@ public class PdfHandler {
                         // Calculate the position and size of the link annotation
                         float width = PDType1Font.HELVETICA.getStringWidth(text) / 1000 * fontSize;
 
-                        // Add the link annotation to the cover page
+                        // Add the link annotation to the page
                         int padding = 2;
                         PDRectangle rectangle = new PDRectangle(wrapper.getX() - padding, wrapper.getY() - padding, width + padding * 2, (float) fontSize + padding);
                         link.setRectangle(rectangle);
                         page.getAnnotations().add(link);
                     }
                 }
+
                 wrapper.getContentStream().endText();
+
+                // Insert the TOC page before the current page
                 document.getPages().insertBefore(page, currentPage);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
-    private List<ContentPage> partitionLists(List<ContentEntry> contentEntries, int partitionSize) {
-        List<ContentPage> contentPages = new ArrayList<>();
 
-        ContentPage currentPage = null;
-        ContentSection currentSection = null;
-        int pageEntryCounter = 0;
-
-        // Set the desired limit for entries per content page
-        for (ContentEntry entry : contentEntries) {
-            // Check if a new content page needs to be created
-            if (currentPage == null || currentSection == null || pageEntryCounter >= partitionSize) {
-                // Create a new content page and section
-                currentSection = new ContentSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
-                currentPage = new ContentPage(entry.name().substring(0, 1), new ArrayList<>());
-                currentPage.sections().add(currentSection);
-                contentPages.add(currentPage);
-                pageEntryCounter = 0;
-            }
-
-            // Check if a new content section needs to be created
-            if (!String.valueOf(entry.name().charAt(0)).equals(currentSection.sectionName())) {
-                // Create a new content section
-                currentSection = new ContentSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
-                currentPage.sections().add(currentSection);
-            }
-
-            // Add the entry to the current section
-            currentSection.contentEntries().add(new ContentEntry(entry.name(), entry.referencedPage() + contentPages.size() - 1));
-            pageEntryCounter++;
-        }
-
-        return contentPages;
-
-    }
 
     public File createMergedDocument(List<File> pdfFiles) {
         if (pdfFiles.size() == 0) return null;
         PDFMergerUtility pdfMerger = new PDFMergerUtility();
         int currentPage = 0;
-        List<ContentEntry> contentEntries = new ArrayList<>();
+        TocBuilder tocBuilder = new TocBuilder(20);
         File file = new File(tempDirWithPrefix + "tmpfile.pdf");
 
         // Initial run: merge documents
         try (PDDocument doc = new PDDocument()) {
-
             for (File pdfFile : pdfFiles) {
                 try (PDDocument document = PDDocument.load(pdfFile)) {
                     pdfMerger.appendDocument(doc, document);
-                    contentEntries.add(new ContentEntry(pdfFile.getName(), currentPage));
+                    tocBuilder.addEntry(new TocEntry(pdfFile.getName(), currentPage));
                     currentPage += document.getNumberOfPages();
                 }
             }
@@ -233,7 +204,8 @@ public class PdfHandler {
         }
 
         try (PDDocument doc = PDDocument.load(file)) {
-            createAndInsertCoverPages(doc, contentEntries);
+            Toc toc = tocBuilder.build();
+            insertTableOfContents(doc, toc);
             doc.save(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
