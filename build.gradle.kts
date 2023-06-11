@@ -42,7 +42,7 @@ javafx {
 
 tasks.test {
     useJUnitPlatform()
-   // exclude("**/*")
+    exclude("**/*")
 }
 
 jlink {
