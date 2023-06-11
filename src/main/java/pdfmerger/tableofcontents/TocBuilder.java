@@ -7,8 +7,15 @@ public class TocBuilder {
 
     private final List<TocEntry> tocEntries = new ArrayList<>();
     private final int maxEntriesPerPage;
+    private final String documentTitle;
 
     public TocBuilder(int maxEntriesPerPage) {
+        this.documentTitle = "";
+        this.maxEntriesPerPage = maxEntriesPerPage;
+    }
+
+    public TocBuilder(String documentTitle, int maxEntriesPerPage) {
+        this.documentTitle = documentTitle;
         this.maxEntriesPerPage = maxEntriesPerPage;
     }
 
@@ -34,7 +41,7 @@ public class TocBuilder {
             if (currentPage == null || currentSection == null || pageEntryCounter >= partitionSize) {
                 // Create a new content page and section
                 currentSection = new TocSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
-                currentPage = new TocPage(entry.name().substring(0, 1), new ArrayList<>());
+                currentPage = new TocPage(documentTitle, new ArrayList<>());
                 currentPage.sections().add(currentSection);
                 tocPages.add(currentPage);
                 pageEntryCounter = 0;

@@ -1,4 +1,4 @@
-module pdfmerger {
+open module pdfmerger {
     requires org.apache.pdfbox;
     requires org.apache.fontbox;
     requires javafx.fxml;
@@ -9,6 +9,5 @@ module pdfmerger {
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.materialdesign2;
     exports pdfmerger.tableofcontents;
-    opens pdfmerger.tableofcontents;
     exports pdfmerger;
 }

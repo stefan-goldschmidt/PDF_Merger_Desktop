@@ -30,27 +30,27 @@ public class TocBuilderTest {
         Toc toc = builder.build();
 
         assertEquals("""
-                        0 A
+                        0\s
                         -A:
                         --Apple
                                                 
-                        1 A
+                        1\s
                         -A:
                         --Artichoke
                                                 
-                        2 B
+                        2\s
                         -B:
                         --Banana
                                                 
-                        3 C
+                        3\s
                         -C:
                         --Cherry
                                                 
-                        4 C
+                        4\s
                         -C:
                         --Coconut
                                                 
-                        5 C
+                        5\s
                         -C:
                         --Carrot
                                                 
@@ -84,28 +84,28 @@ public class TocBuilderTest {
         Toc toc = builder.build();
 
         assertEquals("""
-                        0 A
+                        0\s
                         -A:
                         --Apple
                         --Apricot
                                                 
-                        1 A
+                        1\s
                         -A:
                         --Avocado
                         --Almond
                                                 
-                        2 A
+                        2\s
                         -A:
                         --Artichoke
                         -B:
                         --Banana
                                                 
-                        3 C
+                        3\s
                         -C:
                         --Cherry
                         --Coconut
                                                 
-                        4 C
+                        4\s
                         -C:
                         --Carrot
                                                 
@@ -164,7 +164,7 @@ public class TocBuilderTest {
 
     @Test
     public void testBuildWithEntries() {
-        TocBuilder tocBuilder = new TocBuilder(1000);
+        TocBuilder tocBuilder = new TocBuilder( 1000);
 
         TocEntry entryA = new TocEntry("A", 0);
         TocEntry entryAa = new TocEntry("Aa", 1);
@@ -178,7 +178,7 @@ public class TocBuilderTest {
 
         Toc toc = tocBuilder.build();
         assertEquals("""
-                        0 A
+                        0\s
                         -A:
                         --A
                         --Aa

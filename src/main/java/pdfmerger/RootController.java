@@ -22,6 +22,8 @@ public class RootController implements Initializable {
     @FXML
     public FileSelectionView fileListView;
     @FXML
+    public SettingsView settingsView;
+    @FXML
     public HBox menuBar;
     public ObjectProperty<File> saveDirectory = new SimpleObjectProperty<>(new File(""));
     public ObjectProperty<File> mergedDocument = new SimpleObjectProperty<>(null);
@@ -36,6 +38,7 @@ public class RootController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         fileList.bind(fileListView.itemsProperty());
+        pdfHandler.settingsProperty().bind(settingsView.settingsProperty());
 
         saveFileButton.disableProperty().bind(pdfHandler.canSaveProperty().not());
         pdfHandler.filesProperty().bind(fileList);

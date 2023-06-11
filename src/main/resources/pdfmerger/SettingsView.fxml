@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root fx:id="borderPane" type="BorderPane" xmlns="http://javafx.com/javafx/17.0.2-ea"
+         xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <ScrollPane fx:id="scrollPane" BorderPane.alignment="CENTER">
+            <content>
+                <VBox prefHeight="200.0">
+                    <TitledPane text="Document" textAlignment="RIGHT">
+                        <content>
+                            <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                <Label>Title </Label>
+                                <TextField fx:id="documentName"/>
+                            </HBox>
+                        </content>
+                    </TitledPane>
+                    <TitledPane text="Table of Contents" textAlignment="RIGHT">
+                        <content>
+                            <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                <Label>Entries per Page </Label>
+                                <Spinner fx:id="entriesPerPageSpinner" editable="true"/>
+                            </HBox>
+                        </content>
+                    </TitledPane>
+                    <StackPane>
+                        <Button fx:id="mergeDocumentsButton">Apply Settings</Button>
+                    </StackPane>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</fx:root>

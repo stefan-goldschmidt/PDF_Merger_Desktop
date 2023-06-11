@@ -16,7 +16,7 @@ public class Main extends Application {
 
         // Set up the primary stage
         primaryStage.setTitle("PDFMerger Desktop");
-        primaryStage.setScene(new Scene(root, 1200, 800));
+        primaryStage.setScene(new Scene(root, 1400, 1000));
         primaryStage.show();
     }
 
