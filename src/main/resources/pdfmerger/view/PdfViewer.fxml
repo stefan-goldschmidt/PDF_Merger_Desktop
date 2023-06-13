@@ -21,7 +21,7 @@
     <bottom>
         <HBox alignment="CENTER" maxHeight="32.0" minHeight="32.0" BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="skipToStartButton" focusTraversable="false" mnemonicParsing="false">
+                <Button fx:id="firstButton" focusTraversable="false" mnemonicParsing="false">
                     <graphic>
                         <FontIcon iconLiteral="mdi2c-chevron-double-left" iconSize="22"/>
                     </graphic>
@@ -41,7 +41,7 @@
                         <FontIcon iconLiteral="mdi2c-chevron-right" iconSize="22"/>
                     </graphic>
                 </Button>
-                <Button fx:id="skipToEndButton" focusTraversable="false" mnemonicParsing="false">
+                <Button fx:id="lastButton" focusTraversable="false" mnemonicParsing="false">
                     <graphic>
                         <FontIcon iconLiteral="mdi2c-chevron-double-right" iconSize="22"/>
                     </graphic>

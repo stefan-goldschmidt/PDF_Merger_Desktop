@@ -27,7 +27,11 @@ public class PdfViewer extends BorderPane {
     @FXML
     public Button prevButton;
     @FXML
+    public Button firstButton;
+    @FXML
     public Button nextButton;
+    @FXML
+    public Button lastButton;
     @FXML
     public Label pageLabel;
     @FXML
@@ -62,6 +66,8 @@ public class PdfViewer extends BorderPane {
     public void initialize() {
         prevButton.setOnAction(e -> previousPage());
         nextButton.setOnAction(e -> nextPage());
+        firstButton.setOnAction(e -> firstPage());
+        lastButton.setOnAction(e -> lastPage());
 
         nextButton.disableProperty().bind(Bindings.createBooleanBinding(() -> currentPage.get() >= lastPage.get() - 1, currentPage, lastPage));
         prevButton.disableProperty().bind(Bindings.createBooleanBinding(() -> currentPage.get() <= 0, currentPage, lastPage));
@@ -85,6 +91,20 @@ public class PdfViewer extends BorderPane {
 
 
         pdfImageView.imageProperty().bind(renderedImage);
+    }
+
+    private void lastPage() {
+        if (documentObject.get() == null) {
+            return;
+        }
+        currentPage.set(lastPage.get()-1);
+    }
+
+    private void firstPage() {
+        if (documentObject.get() == null) {
+            return;
+        }
+        currentPage.set(0);
     }
 
     private void nextPage() {
