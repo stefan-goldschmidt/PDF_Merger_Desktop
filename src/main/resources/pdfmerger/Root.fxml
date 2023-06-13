@@ -29,11 +29,9 @@
         </HBox>
         <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.3, 0.8">
             <items>
-                <VBox VBox.vgrow="ALWAYS">
-                    <FileSelectionView fx:id="fileListView" VBox.vgrow="ALWAYS"/>
-                </VBox>
+                <FileSelectionView fx:id="fileListView" VBox.vgrow="ALWAYS"/>
                 <PdfViewer fx:id="pdfViewer" VBox.vgrow="ALWAYS"/>
-                <SettingsView fx:id="settingsView" VBox.vgrow="ALWAYS"/>
+                <SettingsView fx:id="settingsView" VBox.vgrow="SOMETIMES"/>
             </items>
         </SplitPane>
     </children>
