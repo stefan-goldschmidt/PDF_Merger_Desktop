@@ -13,7 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignO;
-import pdfmerger.view.SortingStrategy;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +26,7 @@ public class FileSelectionView extends BorderPane {
     public ListView<File> listView;
     @FXML
     public Button addFilesButton;
+    private ObservableValue<Comparator<File>> sortingComparator;
 
 
     public FileSelectionView() {
@@ -52,7 +52,7 @@ public class FileSelectionView extends BorderPane {
         ));
         sortingChoiceBox.getSelectionModel().selectFirst();
 
-        ObservableValue<Comparator<File>> sortingComparator = sortingChoiceBox.getSelectionModel().selectedItemProperty().map(SortingStrategy::comparator);
+        sortingComparator = sortingChoiceBox.getSelectionModel().selectedItemProperty().map(SortingStrategy::comparator);
         sortingComparator.addListener((observable, oldValue, newValue) -> listView.getItems().sort(newValue));
 
         listView.setCellFactory(param -> new FileListCell());
@@ -74,6 +74,7 @@ public class FileSelectionView extends BorderPane {
 
         public FileListCell() {
             super();
+            label.setWrapText(true);
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
             button.setOnAction(event -> listViewProperty().get().getItems().remove(lastItem));
@@ -104,6 +105,7 @@ public class FileSelectionView extends BorderPane {
             return;
         }
         listView.getItems().addAll(list);
+        listView.getItems().sort(sortingComparator.getValue());
     }
 
     private static class SortingStrategyListCell extends ListCell<SortingStrategy> {
