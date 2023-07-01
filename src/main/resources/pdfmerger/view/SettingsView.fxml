@@ -11,7 +11,7 @@
                     <TitledPane text="Document" textAlignment="RIGHT">
                         <content>
                             <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                <Label>Title </Label>
+                                <Label>Title</Label>
                                 <TextField fx:id="documentName"/>
                             </HBox>
                         </content>
@@ -19,8 +19,16 @@
                     <TitledPane text="Table of Contents" textAlignment="RIGHT">
                         <content>
                             <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                <Label>Entries per Page </Label>
+                                <Label>Entries per Page</Label>
                                 <Spinner fx:id="entriesPerPageSpinner" editable="true"/>
+                            </HBox>
+                        </content>
+                    </TitledPane>
+                    <TitledPane text="Navigation" textAlignment="RIGHT">
+                        <content>
+                            <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                <Label>Add "Go to first page" button</Label>
+                                <CheckBox fx:id="startButtonOnEachPage"/>
                             </HBox>
                         </content>
                     </TitledPane>

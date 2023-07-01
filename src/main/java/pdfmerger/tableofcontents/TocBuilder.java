@@ -57,12 +57,10 @@ public class TocBuilder {
             }
 
             // Add the entry to the current section
-            currentSection.contentEntries().add(new TocEntry(entry.name(), entry.referencedPage() + tocPages.size() - 1));
+            currentSection.contentEntries().add(new TocEntry(entry.name(), entry.referencedPage()));
             pageEntryCounter++;
         }
-
         return tocPages;
-
     }
 
     public void addAll(Collection<TocEntry> entries) {

@@ -1,4 +1,4 @@
 package pdfmerger.view;
 
-public record SettingsRecord(String documentName, int entriesPerPage) {
+public record SettingsRecord(String documentName, int entriesPerPage, boolean startButtonOnEachPage) {
 }

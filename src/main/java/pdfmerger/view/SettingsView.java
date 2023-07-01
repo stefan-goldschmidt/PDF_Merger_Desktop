@@ -4,10 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 
@@ -19,7 +16,7 @@ public class SettingsView extends BorderPane {
 
     public static final int ENTRIES_PER_PAGE_DEFAULT = 42;
     private final ObjectProperty<SettingsRecord> settings = new SimpleObjectProperty<>(
-            new SettingsRecord(getFormattedDate(), ENTRIES_PER_PAGE_DEFAULT)
+            new SettingsRecord(getFormattedDate(), ENTRIES_PER_PAGE_DEFAULT, false)
     );
     @FXML
     private Spinner<Integer> entriesPerPageSpinner;
@@ -29,6 +26,9 @@ public class SettingsView extends BorderPane {
 
     @FXML
     private Button mergeDocumentsButton;
+
+    @FXML
+    private CheckBox startButtonOnEachPage;
 
     public SettingsView() {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("SettingsView.fxml"));
@@ -51,10 +51,10 @@ public class SettingsView extends BorderPane {
         entriesPerPageSpinner.setRepeatDelay(Duration.INDEFINITE);
 
         // Create the settings property and bind it to the spinner value
-
         mergeDocumentsButton.setOnAction(e -> settings.set(new SettingsRecord(
                 documentName.textProperty().getValue(),
-                entriesPerPageSpinner.getValue()
+                entriesPerPageSpinner.getValue(),
+                startButtonOnEachPage.selectedProperty().getValue()
         )));
         documentName.setText(getFormattedDate());
     }

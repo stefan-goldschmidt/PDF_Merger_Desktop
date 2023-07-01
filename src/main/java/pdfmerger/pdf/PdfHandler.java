@@ -16,20 +16,23 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
-import pdfmerger.view.SettingsRecord;
+import org.apache.pdfbox.util.Matrix;
 import pdfmerger.tableofcontents.*;
+import pdfmerger.view.SettingsRecord;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -215,7 +218,7 @@ public class PdfHandler {
 
                     // Iterate through each entry in the section
                     for (TocEntry entry : section.contentEntries()) {
-                        String text = (entry.referencedPage() + 2) + " " + entry.name();
+                        String text = (entry.referencedPage() + 1) + " " + entry.name();
                         wrapper.getContentStream().showText(text);
                         wrapper.newLineAtOffset(0, lineYOffset);
 
@@ -281,7 +284,6 @@ public class PdfHandler {
             }
 
             pdfMerger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-
             doc.save(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -295,7 +297,64 @@ public class PdfHandler {
             throw new RuntimeException(e);
         }
 
+        if (settings.startButtonOnEachPage()) {
+            addStartButtonToEachPage(file);
+        }
+
         return file;
+    }
+
+    private static void addStartButtonToEachPage(File file) {
+        try (PDDocument doc = PDDocument.load(file)) {
+            Iterator<PDPage> iterator = doc.getPages().iterator();
+            if (iterator.hasNext()) {
+                // skip first page
+                iterator.next();
+            }
+            iterator.forEachRemaining(page -> {
+                try (PDPageContentStream stream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, false)) {
+                    int FONT_SIZE = 12;
+
+                    // Page 1
+                    PDFont font = PDType1Font.HELVETICA;
+
+                    // Get the non-justified string width in text space units.
+                    String message = "Start";
+                    float stringWidth = font.getStringWidth(message) * FONT_SIZE;
+
+                    // Get the string height in text space units.
+                    float stringHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() * FONT_SIZE;
+
+                    PDRectangle pageSize = page.getMediaBox();
+                    stream.beginText();
+                    stream.setFont(PDType1Font.HELVETICA, FONT_SIZE);
+                    stream.setTextMatrix(Matrix.getTranslateInstance(stringWidth * 0.1f / 1000f, pageSize.getUpperRightY() - stringHeight / 1000f));
+                    stream.showText(message);
+                    stream.endText();
+                    // Create a link annotation for the entry
+                    PDPageDestination dest = new PDPageFitWidthDestination();
+                    dest.setPage(doc.getPage(0));
+                    PDActionGoTo action = new PDActionGoTo();
+                    action.setDestination(dest);
+                    PDAnnotationLink link = new PDAnnotationLink();
+                    PDBorderStyleDictionary borderStyle = new PDBorderStyleDictionary();
+                    link.setBorderStyle(borderStyle);
+                    link.setDestination(dest);
+                    link.setAction(action);
+
+                    PDRectangle rectangle = new PDRectangle(0, page.getMediaBox().getUpperRightY() - FONT_SIZE * 2, stringWidth * 1.3f / 1000f, FONT_SIZE * 2);
+                    link.setRectangle(rectangle);
+                    page.getAnnotations().add(link);
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            doc.save(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void saveFileToDisk(File outputFile) {
