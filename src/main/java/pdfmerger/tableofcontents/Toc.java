@@ -18,6 +18,6 @@ public record Toc(List<TocPage> tocPages) {
             }
             s.append("\n");
         }
-        return s.toString();
+        return s.toString().trim();
     }
 }

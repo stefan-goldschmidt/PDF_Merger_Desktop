@@ -46,8 +46,8 @@ public class FileSelectionView extends BorderPane {
         sortingChoiceBox.setButtonCell(new SortingStrategyListCell());
         sortingChoiceBox.setCellFactory(param -> new SortingStrategyListCell());
         sortingChoiceBox.getItems().addAll(List.of(
-                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 12), Comparator.comparing(File::getName)),
-                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 12), Comparator.comparing(File::getName).reversed()),
+                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 12), Comparator.comparing(file -> file.getName().toLowerCase())),
+                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 12), Comparator.comparing((File file1) -> file1.getName().toLowerCase()).reversed()),
                 new SortingStrategy("Custom (None)", () -> FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 12), Comparator.comparingInt(f -> 0)) // No sorting
         ));
         sortingChoiceBox.getSelectionModel().selectFirst();

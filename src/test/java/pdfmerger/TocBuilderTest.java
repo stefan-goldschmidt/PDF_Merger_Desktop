@@ -52,9 +52,7 @@ public class TocBuilderTest {
                                                 
                         5\s
                         -C:
-                        --Carrot
-                                                
-                        """,
+                        --Carrot""",
                 toc.getAsciiVisualization());
 
         System.out.println(toc.getAsciiVisualization());
@@ -107,9 +105,7 @@ public class TocBuilderTest {
                                                 
                         4\s
                         -C:
-                        --Carrot
-                                                
-                        """,
+                        --Carrot""",
                 toc.getAsciiVisualization());
     }
 
@@ -163,32 +159,34 @@ public class TocBuilderTest {
     }
 
     @Test
-    public void testBuildWithEntries() {
-        TocBuilder tocBuilder = new TocBuilder( 1000);
+    public void shouldIgnoreCase() {
+        TocBuilder tocBuilder = new TocBuilder(1000);
 
-        TocEntry entryA = new TocEntry("A", 0);
-        TocEntry entryAa = new TocEntry("Aa", 1);
-        TocEntry entryB = new TocEntry("B", 2);
-        TocEntry entryC = new TocEntry("C", 3);
-
-        tocBuilder.addEntry(entryA);
-        tocBuilder.addEntry(entryAa);
-        tocBuilder.addEntry(entryB);
-        tocBuilder.addEntry(entryC);
+        tocBuilder.addAll(List.of(
+                new TocEntry("A", 0),
+                new TocEntry("a", 1),
+                new TocEntry("b", 2),
+                new TocEntry("B", 3),
+                new TocEntry("C", 4),
+                new TocEntry("d", 5)
+        ));
 
         Toc toc = tocBuilder.build();
         assertEquals("""
                         0\s
                         -A:
                         --A
-                        --Aa
+                        --a
                         -B:
+                        --b
                         --B
                         -C:
                         --C
-                        
-                        """,
+                        -D:
+                        --d""",
                 toc.getAsciiVisualization());
 
     }
+
+
 }

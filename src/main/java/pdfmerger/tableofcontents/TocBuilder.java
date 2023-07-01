@@ -1,6 +1,7 @@
 package pdfmerger.tableofcontents;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class TocBuilder {
@@ -38,9 +39,10 @@ public class TocBuilder {
         // Set the desired limit for entries per content page
         for (TocEntry entry : contentEntries) {
             // Check if a new content page needs to be created
+            String sectionName = String.valueOf(entry.name().toUpperCase().charAt(0));
             if (currentPage == null || currentSection == null || pageEntryCounter >= partitionSize) {
                 // Create a new content page and section
-                currentSection = new TocSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
+                currentSection = new TocSection(sectionName, new ArrayList<>());
                 currentPage = new TocPage(documentTitle, new ArrayList<>());
                 currentPage.sections().add(currentSection);
                 tocPages.add(currentPage);
@@ -48,9 +50,9 @@ public class TocBuilder {
             }
 
             // Check if a new content section needs to be created
-            if (!String.valueOf(entry.name().charAt(0)).equals(currentSection.sectionName())) {
+            if (!sectionName.equals(currentSection.sectionName().toUpperCase())) {
                 // Create a new content section
-                currentSection = new TocSection(String.valueOf(entry.name().charAt(0)), new ArrayList<>());
+                currentSection = new TocSection(sectionName, new ArrayList<>());
                 currentPage.sections().add(currentSection);
             }
 
@@ -61,5 +63,9 @@ public class TocBuilder {
 
         return tocPages;
 
+    }
+
+    public void addAll(Collection<TocEntry> entries) {
+        tocEntries.addAll(entries);
     }
 }
