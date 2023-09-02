@@ -1,22 +1,20 @@
 package pdfmerger.tableofcontents;
 
 import java.util.List;
+import java.util.Map;
 
-public record Toc(List<TocPage> tocPages) {
+public record Toc(String documentTitle, Map<String, List<TocEntry>> tocSections) {
     public String getAsciiVisualization() {
 
         StringBuilder s = new StringBuilder();
-        for (int i = 0; i < tocPages.size(); i++) {
 
-            TocPage page = tocPages.get(i);
-            s.append(i).append(" ").append(page.heading()).append("\n");
-            for (TocSection section : page.sections()) {
-                s.append("-").append(section.sectionName()).append(":").append("\n");
-                for (TocEntry entry : section.contentEntries()) {
-                    s.append("--").append(entry.name()).append("\n");
-                }
+        s.append(documentTitle).append("\n");
+        for (Map.Entry<String, List<TocEntry>> mapEntry : tocSections.entrySet()) {
+            s.append("-").append(mapEntry.getKey()).append("\n");
+            for (TocEntry entry : mapEntry.getValue()) {
+                s.append("--").append(entry.name()).append("\n");
             }
-            s.append("\n");
+            //s.append("\n");
         }
         return s.toString().trim();
     }
