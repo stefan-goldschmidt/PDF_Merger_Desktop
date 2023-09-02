@@ -1,8 +1,10 @@
 package pdfmerger.view;
 
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -18,15 +20,22 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FileSelectionView extends BorderPane {
     @FXML
-    public ComboBox<SortingStrategy> sortingChoiceBox;
+    public ComboBox<SortingStrategy<File>> sortingChoiceBox;
     @FXML
-    public ListView<File> listView;
+    private ListView<File> listView;
     @FXML
     public Button addFilesButton;
     private ObservableValue<Comparator<File>> sortingComparator;
+
+    public ObservableList<File> getUnsortedFileList() {
+        return unsortedFileList;
+    }
+
+    private ObservableList<File> unsortedFileList = FXCollections.observableArrayList();
 
 
     public FileSelectionView() {
@@ -46,22 +55,28 @@ public class FileSelectionView extends BorderPane {
         sortingChoiceBox.setButtonCell(new SortingStrategyListCell());
         sortingChoiceBox.setCellFactory(param -> new SortingStrategyListCell());
         sortingChoiceBox.getItems().addAll(List.of(
-                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 12), Comparator.comparing(file -> file.getName().toLowerCase())),
-                new SortingStrategy("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 12), Comparator.comparing((File file1) -> file1.getName().toLowerCase()).reversed()),
-                new SortingStrategy("Custom (None)", () -> FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 12), Comparator.comparingInt(f -> 0)) // No sorting
+                new SortingStrategy<>("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_ASCENDING, 12), Comparator.comparing(file -> file.getName().toLowerCase())),
+                new SortingStrategy<>("Alphabetical", () -> FontIcon.of(MaterialDesignO.ORDER_ALPHABETICAL_DESCENDING, 12), Comparator.comparing((File file1) -> file1.getName().toLowerCase()).reversed()),
+                new SortingStrategy<>("Custom (None)", () -> FontIcon.of(MaterialDesignO.ORDER_BOOL_DESCENDING_VARIANT, 12), Comparator.comparingInt(f -> 0)) // No sorting
         ));
         sortingChoiceBox.getSelectionModel().selectFirst();
 
         sortingComparator = sortingChoiceBox.getSelectionModel().selectedItemProperty().map(SortingStrategy::comparator);
-        sortingComparator.addListener((observable, oldValue, newValue) -> listView.getItems().sort(newValue));
 
-        listView.setCellFactory(param -> new FileListCell());
+        SortedList<File> sortedList = new SortedList<>(unsortedFileList);
+        sortedList.comparatorProperty().bind(sortingComparator);
+        listView.setItems(sortedList);
+
+        listView.setCellFactory(param -> new FileListCell(fileToDelete -> unsortedFileList.remove(fileToDelete)));
         addFilesButton.setOnAction(e -> addFilesAction());
-
     }
 
-    public ObjectProperty<ObservableList<File>> itemsProperty() {
+    public ReadOnlyObjectProperty<ObservableList<File>> itemsProperty() {
         return listView.itemsProperty();
+    }
+
+    public void setSortingComparator(Comparator<File> comparator) {
+        //sortingComparator.set(comparator);
     }
 
 
@@ -72,26 +87,27 @@ public class FileSelectionView extends BorderPane {
         Button button = new Button("✕");
         File lastItem;
 
-        public FileListCell() {
+        public FileListCell(Consumer<File> deleteAction) {
             super();
             label.setWrapText(true);
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
-            button.setOnAction(event -> listViewProperty().get().getItems().remove(lastItem));
+            button.setOnAction(event -> deleteAction.accept(lastItem));
         }
 
         @Override
         protected void updateItem(File item, boolean empty) {
             super.updateItem(item, empty);
-            setText(null);  // No text in label of super class
-            if (empty) {
+            if (empty || item == null) {
                 lastItem = null;
                 setGraphic(null);
-            } else {
-                lastItem = item;
-                label.setText(item != null ? item.getName() : "<null>");
-                setGraphic(hbox);
+                setText(null);
+                return;
             }
+
+            lastItem = item;
+            setText(item.getName());
+            setGraphic(hbox);
         }
     }
 
@@ -104,13 +120,12 @@ public class FileSelectionView extends BorderPane {
         if (list == null || list.isEmpty()) {
             return;
         }
-        listView.getItems().addAll(list);
-        listView.getItems().sort(sortingComparator.getValue());
+        unsortedFileList.addAll(list);
     }
 
-    private static class SortingStrategyListCell extends ListCell<SortingStrategy> {
+    private static class SortingStrategyListCell extends ListCell<SortingStrategy<File>> {
         @Override
-        protected void updateItem(SortingStrategy item, boolean empty) {
+        protected void updateItem(SortingStrategy<File> item, boolean empty) {
             super.updateItem(item, empty);
             if (item == null) {
                 setText(null);

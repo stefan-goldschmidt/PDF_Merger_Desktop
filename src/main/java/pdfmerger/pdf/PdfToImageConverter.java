@@ -13,7 +13,7 @@ public class PdfToImageConverter {
     public static Image renderDocumentToImage(File file, int page) {
         if (file == null) return null;
         try (PDDocument document = PDDocument.load(file)) {
-            if (document == null || document.getNumberOfPages() < page) {
+            if (document == null || document.getNumberOfPages() <= page) {
                 return null;
             }
 

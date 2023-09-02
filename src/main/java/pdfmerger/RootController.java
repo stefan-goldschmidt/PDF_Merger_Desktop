@@ -1,8 +1,6 @@
 package pdfmerger;
 
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,29 +19,29 @@ import java.util.ResourceBundle;
 
 public class RootController implements Initializable {
 
-
-    public ListProperty<File> fileList = new SimpleListProperty<>();
-    @FXML
-    public FileSelectionView fileListView;
-    @FXML
-    public SettingsView settingsView;
-    @FXML
-    public HBox menuBar;
-    public ObjectProperty<File> saveDirectory = new SimpleObjectProperty<>(new File(""));
-    @FXML
-    public PdfViewer pdfViewer;
-    @FXML
-    public Button saveFileButton;
-
     private final PdfHandler pdfHandler = new PdfHandler();
+    @FXML
+    private SettingsView settingsView;
+    @FXML
+    private HBox menuBar;
+    private final ObjectProperty<File> saveDirectory = new SimpleObjectProperty<>(new File(""));
+    @FXML
+    private PdfViewer pdfViewer;
+    @FXML
+    private Button saveFileButton;
+    @FXML
+    private FileSelectionView fileListView;
+
+    public FileSelectionView getFileListView() {
+        return fileListView;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        fileList.bind(fileListView.itemsProperty());
         pdfHandler.settingsProperty().bind(settingsView.settingsProperty());
 
         saveFileButton.disableProperty().bind(pdfHandler.canSaveProperty().not());
-        pdfHandler.filesProperty().bind(fileList);
+        pdfHandler.filesProperty().bind(fileListView.itemsProperty());
         pdfViewer.documentObjectProperty().bind(pdfHandler.outputDocumentProperty());
     }
 

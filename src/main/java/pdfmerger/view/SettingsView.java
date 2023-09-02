@@ -14,9 +14,8 @@ import java.time.format.DateTimeFormatter;
 
 public class SettingsView extends BorderPane {
 
-    public static final int ENTRIES_PER_PAGE_DEFAULT = 42;
     private final ObjectProperty<SettingsRecord> settings = new SimpleObjectProperty<>(
-            new SettingsRecord(getFormattedDate(), ENTRIES_PER_PAGE_DEFAULT, false)
+            new SettingsRecord(getFormattedDate(), false)
     );
     @FXML
     private Spinner<Integer> entriesPerPageSpinner;
@@ -43,17 +42,9 @@ public class SettingsView extends BorderPane {
 
     @FXML
     public void initialize() {
-        // Limit the spinner values to a range of 1 to 1000
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1000);
-        valueFactory.setValue(ENTRIES_PER_PAGE_DEFAULT);
-        entriesPerPageSpinner.setValueFactory(valueFactory);
-
-        entriesPerPageSpinner.setRepeatDelay(Duration.INDEFINITE);
-
         // Create the settings property and bind it to the spinner value
         mergeDocumentsButton.setOnAction(e -> settings.set(new SettingsRecord(
                 documentName.textProperty().getValue(),
-                entriesPerPageSpinner.getValue(),
                 startButtonOnEachPage.selectedProperty().getValue()
         )));
         documentName.setText(getFormattedDate());

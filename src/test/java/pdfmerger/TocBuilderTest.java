@@ -1,7 +1,9 @@
 package pdfmerger;
 
 import org.junit.jupiter.api.Test;
-import pdfmerger.tableofcontents.*;
+import pdfmerger.tableofcontents.Toc;
+import pdfmerger.tableofcontents.TocBuilder;
+import pdfmerger.tableofcontents.TocEntry;
 
 import java.util.List;
 
@@ -11,8 +13,8 @@ public class TocBuilderTest {
 
     @Test
     public void entriesShouldBeDividedIntoSectionsAcrossMultiplePages1() {
-        // Create a TocBuilder instance with a maximum of 1 entries per page
-        TocBuilder builder = new TocBuilder(1);
+        // Create a TocBuilder2 instance with a maximum of 1 entries per page
+        TocBuilder builder = new TocBuilder();
 
         // Add entries starting with A
         builder.addEntry(new TocEntry("Apple", 0));
@@ -30,28 +32,14 @@ public class TocBuilderTest {
         Toc toc = builder.build();
 
         assertEquals("""
-                        0\s
-                        -A:
+                        -A
                         --Apple
-                                                
-                        1\s
-                        -A:
                         --Artichoke
-                                                
-                        2\s
-                        -B:
+                        -B
                         --Banana
-                                                
-                        3\s
-                        -C:
+                        -C
                         --Cherry
-                                                
-                        4\s
-                        -C:
                         --Coconut
-                                                
-                        5\s
-                        -C:
                         --Carrot""",
                 toc.getAsciiVisualization());
 
@@ -60,8 +48,8 @@ public class TocBuilderTest {
 
     @Test
     public void entriesShouldBeDividedIntoSectionsAcrossMultiplePages2() {
-        // Create a TocBuilder instance with a maximum of 2 entries per page
-        TocBuilder builder = new TocBuilder(2);
+        // Create a TocBuilder2 instance with a maximum of 2 entries per page
+        TocBuilder builder = new TocBuilder("");
 
         // Add entries starting with A
         builder.addEntry(new TocEntry("Apple", 0));
@@ -82,47 +70,34 @@ public class TocBuilderTest {
         Toc toc = builder.build();
 
         assertEquals("""
-                        0\s
-                        -A:
+                        -A
                         --Apple
                         --Apricot
-                                                
-                        1\s
-                        -A:
                         --Avocado
                         --Almond
-                                                
-                        2\s
-                        -A:
                         --Artichoke
-                        -B:
+                        -B
                         --Banana
-                                                
-                        3\s
-                        -C:
+                        -C
                         --Cherry
                         --Coconut
-                                                
-                        4\s
-                        -C:
                         --Carrot""",
                 toc.getAsciiVisualization());
     }
 
     @Test
     public void testBuildWithNoEntries() {
-        TocBuilder tocBuilder = new TocBuilder(1000);
+        TocBuilder TocBuilder = new TocBuilder("");
 
-        Toc toc = tocBuilder.build();
-        List<TocPage> tocPages = toc.tocPages();
+        Toc toc = TocBuilder.build();
 
-        assertEquals(0, tocPages.size());
+        assertEquals(0, toc.tocSections().size());
     }
 
     @Test
     public void sectionsShouldBeCreatedFromEntries() {
-        // Create a TocBuilder instance
-        TocBuilder builder = new TocBuilder(1000);
+        // Create a TocBuilder2 instance
+        TocBuilder builder = new TocBuilder();
 
         // Add entries starting with A
         builder.addEntry(new TocEntry("Apple", 0));
@@ -140,29 +115,14 @@ public class TocBuilderTest {
         Toc toc = builder.build();
 
         // Verify the sections
-        assertEquals(1, toc.tocPages().size());
-
-        TocPage page = toc.tocPages().get(0);
-        assertEquals(3, page.sections().size());
-
-        TocSection sectionA = page.sections().get(0);
-        assertEquals("A", sectionA.sectionName());
-        assertEquals(3, sectionA.contentEntries().size());
-
-        TocSection sectionB = page.sections().get(1);
-        assertEquals("B", sectionB.sectionName());
-        assertEquals(1, sectionB.contentEntries().size());
-
-        TocSection sectionC = page.sections().get(2);
-        assertEquals("C", sectionC.sectionName());
-        assertEquals(2, sectionC.contentEntries().size());
+        assertEquals(3, toc.tocSections().size());
     }
 
     @Test
     public void shouldIgnoreCase() {
-        TocBuilder tocBuilder = new TocBuilder(1000);
+        TocBuilder TocBuilder = new TocBuilder();
 
-        tocBuilder.addAll(List.of(
+        TocBuilder.addAll(List.of(
                 new TocEntry("A", 0),
                 new TocEntry("a", 1),
                 new TocEntry("b", 2),
@@ -171,18 +131,17 @@ public class TocBuilderTest {
                 new TocEntry("d", 5)
         ));
 
-        Toc toc = tocBuilder.build();
+        Toc toc = TocBuilder.build();
         assertEquals("""
-                        0\s
-                        -A:
+                        -A
                         --A
                         --a
-                        -B:
+                        -B
                         --b
                         --B
-                        -C:
+                        -C
                         --C
-                        -D:
+                        -D
                         --d""",
                 toc.getAsciiVisualization());
 
