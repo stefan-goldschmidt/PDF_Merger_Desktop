@@ -58,6 +58,19 @@ public class PdfHandler {
         }
     }
 
+    private static PDAnnotationLink getPdAnnotationLink(PDPage page) {
+        PDPageDestination dest = new PDPageFitWidthDestination();
+        dest.setPage(page);
+        PDActionGoTo action = new PDActionGoTo();
+        action.setDestination(dest);
+        PDAnnotationLink link = new PDAnnotationLink();
+        PDBorderStyleDictionary borderStyle = new PDBorderStyleDictionary();
+        link.setBorderStyle(borderStyle);
+        link.setDestination(dest);
+        link.setAction(action);
+        return link;
+    }
+
     private static PDAnnotationLink getPdAnnotationLink(PDDocument document, int entry) {
         PDPageDestination dest = new PDPageFitWidthDestination();
         dest.setPage(document.getPage(entry));
@@ -197,13 +210,11 @@ public class PdfHandler {
         // Get the first page of the document
         PDPage lastAddedPage = document.getPage(0);
 
-
         int fontSize = 12;
         PDType1Font entryFont = PDType1Font.HELVETICA;
         PDType1Font sectionFont = PDType1Font.HELVETICA_BOLD;
         PDType1Font titleFont = PDType1Font.HELVETICA_BOLD;
         int titleFontSize = 18;
-
 
         PDPage currentPage = new PDPage(PDRectangle.A4);
         boolean currentPageHasBeenAdded = false;
@@ -215,6 +226,7 @@ public class PdfHandler {
         float y = currentPage.getMediaBox().getHeight() - pageBorderPadding;
         float titleHeight = titleFont.getFontDescriptor().getFontBoundingBox().getHeight() * titleFontSize;
         float lineHeight = entryFont.getFontDescriptor().getFontBoundingBox().getHeight() * fontSize;
+        int pageJumpOffset = 0;
 
         for (Map.Entry<String, List<TocEntry>> section : toc.entrySet()) {
             if (section.getValue().isEmpty()) {
@@ -227,6 +239,7 @@ public class PdfHandler {
                 if (isPageFull) {
                     document.getPages().insertBefore(currentPage, lastAddedPage);
                     currentPage = new PDPage(PDRectangle.A4);
+                    pageJumpOffset++;
                     showSection = true;
                     showDocumentTitle = true;
                     y = currentPage.getMediaBox().getHeight() - pageBorderPadding;
@@ -281,7 +294,7 @@ public class PdfHandler {
 
                     // ANNOTATION
                     // Create a link annotation for the entry
-                    PDAnnotationLink link = getPdAnnotationLink(document, entry.referencedPage());
+                    PDAnnotationLink link = getPdAnnotationLink(document.getPage(entry.referencedPage() + pageJumpOffset));
 
                     // Calculate the position and size of the link annotation
                     float width = pageSize.getWidth() - entryX - pageBorderPadding - seperatorPadding;
